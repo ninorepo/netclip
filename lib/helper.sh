@@ -87,8 +87,13 @@ case "$1" in
 
             exit 1
         fi
-
-        base=$(basename "$SRC")
+	
+	# third argument is new name(rename) of the shared file
+	if [[ -n "$3" ]]; then
+		base=$(basename "$3")
+	else
+        	base=$(basename "$SRC")
+	fi
 
         cp "$SRC" "$SHARED_DIR/$base"
 
