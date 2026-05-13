@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Simple File Share</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:#111;
+    color:white;
+    font-family:Arial;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:15px;
+}
+
+.card{
+    background:#1e1e1e;
+    border-radius:12px;
+    padding:20px;
+    margin-top:20px;
+}
+
+input[type=file]{
+    width:100%;
+    padding:10px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
+    background:#2d7dff;
+    color:white;
+    font-size:16px;
+}
+
+#status{
+    margin-top:10px;
+}
+
+a{
+    color:#6db2ff;
+    text-decoration:none;
+    word-break:break-all;
+}
+
+li{
+    margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>File Sharing</h2>
+	<a href="/">Clipboard Sharing</a>
+        <input type="file" id="file">
+
+        <button onclick="upload()">
+            Upload
+        </button>
+
+        <div id="status"></div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Files</h2>
+
+        <div id="fileList">
+            Loading...
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+async function loadFiles()
+{
+    const res =
+        await fetch("/cgi-bin/list.sh");
+
+    const html =
+        await res.text();
+
+    document.getElementById("fileList")
+    .innerHTML = html;
+}
+
+async function upload()
+{
+    const file =
+        document.getElementById("file").files[0];
+
+    const status =
+        document.getElementById("status");
+
+    if (!file)
+    {
+        status.innerText =
+            "Select file";
+
+        return;
+    }
+
+    status.innerText =
+        "Uploading...";
+
+    try
+    {
+        const data =
+            await file.arrayBuffer();
+
+        const res =
+            await fetch(
+                "/cgi-bin/upload.sh?filename="
+                + encodeURIComponent(file.name),
+                {
+                    method:"POST",
+                    body:data
+                });
+
+        const text =
+            await res.text();
+
+        status.innerText = text;
+
+        loadFiles();
+    }
+    catch(err)
+    {
+        status.innerText =
+            "Upload failed";
+    }
+}
+
+loadFiles();
+
+</script>
+
+</body>
+</html>
+
